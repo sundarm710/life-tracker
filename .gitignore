@@ -1,0 +1,23 @@
+echo "# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Data files
+*.csv
+*.db
+
+# Obsidian files
+*.md" > .gitignore
