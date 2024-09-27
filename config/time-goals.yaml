@@ -1,0 +1,82 @@
+budgets:
+  - name: "Chess"
+    target: 30
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-09-01"
+    end_date: "2024-09-30"
+    include_weekends: true
+
+  - name: "Workout"
+    target: 40
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-07-01"
+    end_date: "2024-08-31"
+    include_weekends: true
+
+  # - name: "Workout"
+  #   target: 100
+  #   unit: "hours"
+  #   direction: "greater"
+  #   start_date: "2024-10-01"
+  #   end_date: "2024-12-31"
+  #   include_weekends: true
+
+  - name: "Chess"
+    target: 100
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+
+  - name: "Meditation"
+    target: 100
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+
+  - name: "Data Science"
+    target: 100
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+
+  - name: "Reading-Writing"
+    target: 100
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+
+  - name: "Social Media"
+    target: 10
+    unit: "hours"
+    direction: "less"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+
+  - name: "Weekly Workout"
+    target: 5
+    unit: "hours"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: false
+    frequency: "weekly"
+
+  - name: "Monthly Reading"
+    target: 4
+    unit: "books"
+    direction: "greater"
+    start_date: "2024-10-01"
+    end_date: "2024-12-31"
+    include_weekends: true
+    frequency: "monthly"
