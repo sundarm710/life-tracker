@@ -80,9 +80,9 @@ def write_to_csv(data, output_file):
         for row in data:
             writer.writerow(row)
 
-def main():
+def parse_main():
     file_path = OBSIDIAN_LEDGER_PATH  # Path to your ledger file
-    output_file = 'ledger_output.csv'  # Output CSV file name
+    output_file = 'files/ledger_output.csv'  # Output CSV file name
 
     parsed_data = parse_ledger_file(file_path)
     write_to_csv(parsed_data, output_file)
@@ -90,4 +90,4 @@ def main():
     print(f"CSV file '{output_file}' has been created successfully.")
 
 if __name__ == "__main__":
-    main()
+    parse_main()
