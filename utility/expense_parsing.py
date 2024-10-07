@@ -16,21 +16,17 @@ def parse_ledger_file(file_path):
     result = []
 
     for block in blocks:
-        # print(block)
         lines = block.split('\n')
 
         # Check if the block is part of the "Starting Balances" section
         if any("Starting Balances" in line for line in lines):
-            print("Skipping starting balances")
             continue
 
         # Activate parsing after the starting balances
         if any(re.match(r'\d{4}/\d{2}/\d{2}', line) for line in lines):
-            print("Starting parsing")
             start_parsing = True
 
         if not start_parsing:
-            print("Not starting parsing")
             continue
 
         # Extract date and description from the first line
@@ -40,18 +36,14 @@ def parse_ledger_file(file_path):
         if date_description_match:
             date_str, description = date_description_match.groups()
             date = datetime.strptime(date_str, '%Y/%m/%d').strftime('%Y-%m-%d')
-            print("Date and description: ", date, description)
         else:
-            print(f"Skipping block: {block}")
             # Skip this block if the date/description line doesn't match
             continue
 
         # Extract the transaction details from the remaining lines
         for line in lines[1:]:
-            print(line)
             # Match accounts and amounts in the format 'Account:SubAccount:SubSubAccount ₹Amount'
             account_match = re.match(r'([\w:]+)\s+₹([\d.,]+)', line.strip())
-            print(account_match)
             if account_match:
                 account, amount = account_match.groups()
 

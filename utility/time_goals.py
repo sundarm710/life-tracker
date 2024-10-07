@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 import streamlit as st
-from utility.time_spent import main as time_dash
 from components.budget_manager import BudgetManager
 import pandas as pd
 import plotly.graph_objects as go

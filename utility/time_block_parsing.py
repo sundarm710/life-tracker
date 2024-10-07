@@ -90,6 +90,7 @@ def save_to_csv(results, output_file):
         writer.writerow(['Date', 'Start Time', 'End Time', 'Duration', 'Activity'])
         writer.writerows(results)
 
+@st.cache_data
 def fetch_time_blocks():
     results = process_files(OBSIDIAN_DAILY_NOTES_PATH)
     save_to_csv(results, time_blocks_file)
@@ -102,9 +103,11 @@ def fetch_time_blocks():
     df['Duration'] = pd.to_timedelta(df['Duration'])
     df['Duration_Hours'] = df['Duration'].dt.total_seconds() / 3600
     df['Activity Category'] = df.apply(assign_activity, axis=1)
+    df.to_csv('files/time_blocks_parsed.csv', index=False)
     return df
 
 def main():
     fetch_time_blocks()
+
 if __name__ == "__main__":
     main()

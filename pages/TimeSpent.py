@@ -1,5 +1,5 @@
 import streamlit as st
-from utility.time_spent import main as time_spent
+from utility.time_spent_base import main as time_spent
 st.set_page_config(layout="wide")
 
 
