@@ -1,0 +1,27 @@
+# Monthly Income Configuration
+
+# Format: 
+# YYYY-MM-DD:
+#   amount: Amount in INR
+#   type: Type of payin (salary or repayment)
+
+2024-06-01:
+  amount: 110000
+  type: salary
+2024-07-01:
+  amount: 110000
+  type: salary
+2024-08-01:
+  amount: 110000
+  type: salary
+2024-09-01:
+  amount: 115000
+  type: salary
+2024-10-01:
+  amount: 115000
+  type: salary
+
+# Add or modify entries as needed
+# Ensure dates are in YYYY-MM-DD format
+# Amounts should be in Indian Rupees (INR)
+# Type should be either 'salary' or 'repayment'

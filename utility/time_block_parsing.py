@@ -1,3 +1,46 @@
+"""
+This module provides functionality for parsing and processing time blocks from Obsidian daily notes.
+
+The main features of this module include:
+1. Parsing time blocks from Markdown files
+2. Processing multiple files within a date range
+3. Categorizing activities based on predefined keywords
+4. Saving parsed data to CSV files
+5. Creating a pandas DataFrame with processed time block data
+
+Functions:
+- parse_time_blocks(file_path, file_date): Parse time blocks from a single file
+- process_files(base_path): Process all files within a specified date range
+- fetch_activities(): Return a dictionary of activity categories and their associated keywords
+- assign_activity(row): Assign an activity category to a given row of data
+- save_to_csv(results, output_file): Save processed results to a CSV file
+- fetch_time_blocks(): Main function to process all time blocks and return a DataFrame
+
+Usage:
+To use this module, ensure that the OBSIDIAN_DAILY_NOTES_PATH environment variable is set to the
+directory containing your Obsidian daily notes. Then, call the fetch_time_blocks() function to
+process all time blocks and get a pandas DataFrame with the results.
+
+Dependencies:
+- os
+- csv
+- datetime
+- re
+- streamlit
+- dotenv
+- pandas
+
+Environment Variables:
+- OBSIDIAN_DAILY_NOTES_PATH: Path to the directory containing Obsidian daily notes
+
+Output Files:
+- files/time_blocks.csv: Raw parsed time blocks
+- files/time_blocks_parsed.csv: Processed time blocks with additional information
+
+Note: This module uses Streamlit's caching mechanism (@st.cache_data) to improve performance
+when fetching time blocks repeatedly.
+"""
+
 import os
 import csv
 from datetime import datetime, timedelta
@@ -5,13 +48,25 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 import pandas as pd
+
 # Load environment variables
 load_dotenv()
+
 # Get the path to Obsidian daily notes from environment variable
 OBSIDIAN_DAILY_NOTES_PATH = os.getenv('OBSIDIAN_DAILY_NOTES_PATH')
 time_blocks_file = "files/time_blocks.csv"
 
 def parse_time_blocks(file_path, file_date):
+    """
+    Parse time blocks from a single file.
+
+    Args:
+    file_path (str): Path to the Markdown file
+    file_date (datetime.date): Date of the file
+
+    Returns:
+    list: List of tuples containing (start_datetime, end_datetime, duration, activity)
+    """
     with open(file_path, 'r') as file:
         content = file.read()
 
@@ -32,10 +87,19 @@ def parse_time_blocks(file_path, file_date):
     
     return parsed_blocks
 
-    
 def process_files(base_path):
+    """
+    Process all files within a specified date range.
+
+    Args:
+    base_path (str): Path to the directory containing daily note files
+
+    Returns:
+    list: List of lists containing [date, start_time, end_time, duration, activity]
+    """
     start_date = datetime(2024, 7, 1).date()
     current_date = datetime.now().date()
+
     results = []
 
     while current_date >= start_date:
@@ -54,10 +118,17 @@ def process_files(base_path):
                 ])
         
         current_date -= timedelta(days=1)
+        print(current_date)
     
     return results
 
 def fetch_activities():
+    """
+    Return a dictionary of activity categories and their associated keywords.
+
+    Returns:
+    dict: Dictionary of activity categories with their colors and keywords
+    """
     return{
             'Sleep': {'color': 'black', 'keywords': ['Sleep', 'Nap', 'Bed', 'Wind Down']},
             'Admin': {'color': 'orange', 'keywords': ['Chores', 'Prep', 'Dishes', 'Bath', 'Breakfast', 'Dinner', 'Lunch', 'Commute', 'Travel', 'Bus']},
@@ -75,27 +146,51 @@ def fetch_activities():
         }
 
 def assign_activity(row):
-     # Define activities and their colors
+    """
+    Assign an activity category to a given row of data.
+
+    Args:
+    row (pandas.Series): A row from the DataFrame containing an 'Activity' column
+
+    Returns:
+    str: The assigned activity category
+    """
     activities = fetch_activities()
 
-    # Check the activity in the priority order defined in the activities dictionary
     for activity, details in activities.items():
         if any(keyword.lower() in row['Activity'].lower() for keyword in details['keywords']):
             return activity
     return 'Other'  # Fallback if no match is found
 
 def save_to_csv(results, output_file):
+    """
+    Save processed results to a CSV file.
+
+    Args:
+    results (list): List of lists containing time block data
+    output_file (str): Path to the output CSV file
+    """
     with open(output_file, 'w', newline='') as csvfile:
+        print ("Writing File")
         writer = csv.writer(csvfile)
         writer.writerow(['Date', 'Start Time', 'End Time', 'Duration', 'Activity'])
         writer.writerows(results)
 
-@st.cache_data
 def fetch_time_blocks():
+    """
+    Main function to process all time blocks and return a DataFrame.
+
+    This function is cached using Streamlit's caching mechanism to improve performance.
+
+    Returns:
+    pandas.DataFrame: DataFrame containing processed time block data
+    """
+    print ("Processing Files")
     results = process_files(OBSIDIAN_DAILY_NOTES_PATH)
     save_to_csv(results, time_blocks_file)
 
     df = pd.read_csv(time_blocks_file)
+    print (df.head())
     df['Date'] = pd.to_datetime(df['Date'])
     df['Start Time'] = pd.to_datetime(df['Start Time'], format='%H:%M').dt.time
     df['End Time'] = pd.to_datetime(df['End Time'], format='%H:%M').dt.time
@@ -107,6 +202,9 @@ def fetch_time_blocks():
     return df
 
 def main():
+    """
+    Main function to execute the time block fetching process.
+    """
     fetch_time_blocks()
 
 if __name__ == "__main__":
