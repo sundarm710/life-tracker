@@ -1,56 +1,7 @@
-import os
-import sys
-# Add the project root directory to the Python path
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(project_root)
 import streamlit as st
 import pandas as pd
-import plotly.graph_objs as go
-
-from utility.expense_parsing import parse_main
-
-st.set_page_config(layout="wide")
-
-# Load data
-@st.cache_data
-def load_data():
-    parse_main()
-    # Load the CSV into a DataFrame
-    df = pd.read_csv("files/ledger_output.csv", parse_dates=["Date"])
-    df['Date'] = pd.to_datetime(df['Date'])
-    df['Day of Week'] = df['Date'].dt.day_name()  # Add day of the week
-    df['Amount'] = pd.to_numeric(df['Amount'].replace('₹', '', regex=True).replace(',', '', regex=True), errors='coerce')
-    df['DateGroup'] = df['Date'].dt.strftime('%Y-%m-%d')
-    df['Week'] = df['Date'].dt.to_period('W').astype(str)
-    df['Month'] = df['Date'].dt.to_period('M').astype(str)
-    return df
-
-def fetch_only_expenses():
-    df = load_data()
-    df = df[df['Expense_1'] == 'Expenses']
-    return df
-
-def fetch_only_expenses_excluding_home_loan():
-    df = fetch_only_expenses()
-    df = df[(df['Expense_3'] != 'Loan') & (df['Expense_2'] != 'Home')]
-    return df
-
-def fetch_default_expenses():
-    df = fetch_only_expenses()
-    df = df[df['Expense_2'].isin(['Bike', 'Entertainment', 'Food', 'Vice', 'Subscriptions', 'Home', 'SelfCare'])]
-    return df
-
-def fetch_hover_text(df):
-    # Ensure columns exist in DataFrame
-    return [f"{expense_1} ({expense_2}, {expense_3})<br>{description}<br>{date.strftime('%Y-%m-%d')}, {amount:.2f} ₹" 
-            for expense_1, expense_2, expense_3, description, amount, date  
-                in zip(df['Expense_1'], 
-                       df['Expense_2'], 
-                       df['Expense_3'], 
-                       df['Description'],
-                       df['Amount'], 
-                       df['Date'])]
-
+import plotly.graph_objects as go
+from utility.expenses_base import fetch_only_expenses, fetch_default_expenses, fetch_hover_text
 
 
 # Function to create time charts (daily, weekly, or monthly)
@@ -63,44 +14,23 @@ def create_time_chart(df, view_type, group_by):
     :param group_by: The level of grouping ('Expense_1', 'Expense_2', 'Expense_3')
     :return: Plotly figure object
     """
-    if view_type == 'daily':
-        
-        x_values = 'DateGroup'
-        title = f"Daily Expense Breakdown"
-        xaxis_title = "Date"
-    elif view_type == 'weekly':
-        
-        x_values = 'Week'
-        title = f"Weekly Expense Breakdown"
-        xaxis_title = "Week"
-    elif view_type == 'monthly':
+    view_type_mapping = {
+        'daily': ('DateGroup', 'Daily Expense Breakdown', 'Date'),
+        'weekly': ('Week', 'Weekly Expense Breakdown', 'Week'),
+        'monthly': ('Month', 'Monthly Expense Breakdown', 'Month')
+    }
 
-        x_values = 'Month'
-        title = f"Monthly Expense Breakdown"
-        xaxis_title = "Month"
-    else:
+    if view_type not in view_type_mapping:
         raise ValueError("Invalid view type. Choose 'daily', 'weekly', or 'monthly'.")
 
-    # # Group the data by the chosen expense level and date grouping
-    # grouped_df = df.groupby([x_values, group_by])['Amount'].sum().reset_index()
-    # # Sort the grouped data by the date column
-    # grouped_df = grouped_df.sort_values(x_values)
-
-
-    # grouped_df = df.groupby([col for col in df.columns if col != 'Amount'])['Amount'].sum().reset_index()
-
-    # # Sort the grouped data by the date column
-    # grouped_df = grouped_df.sort_values('Date')
-
-    # st.dataframe(df)
-    # Create the figure and add traces
-    fig = go.Figure()
+    x_values, title, xaxis_title = view_type_mapping[view_type]
 
     # Group the data by the chosen expense level and date grouping
-    grouped_df = df.groupby([x_values, group_by])['Amount'].sum().reset_index()
-    
-    # Sort the grouped data by the date column
+    grouped_df = df.groupby([x_values, 'Expense_1', 'Expense_2', 'Expense_3', 'Description', 'Date'])['Amount'].sum().reset_index()
     grouped_df = grouped_df.sort_values(x_values)
+
+    # Create the figure and add traces
+    fig = go.Figure()
 
     # Get unique categories
     categories = grouped_df[group_by].unique()
@@ -113,8 +43,8 @@ def create_time_chart(df, view_type, group_by):
             y=category_df['Amount'],
             name=category,
             hoverinfo='text',
-            hovertext=[f"{category}<br>{x_val}<br>Amount: ₹{amount:.2f}" 
-                       for x_val, amount in zip(category_df[x_values], category_df['Amount'])]
+            customdata=category_df[['Expense_1', 'Expense_2', 'Expense_3', 'Description', 'Date']],
+            hovertemplate=fetch_hover_text(category_df), 
         ))
 
     fig.update_layout(
