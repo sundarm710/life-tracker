@@ -1,10 +1,18 @@
 import re
 import csv
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+print(os.getenv('OBSIDIAN_BASE_PATH'))
+
 
 # Get the path to Obsidian ledger.txt from environment variable
 # OBSIDIAN_LEDGER_PATH = os.getenv('OBSIDIAN_LEDGER_PATH')
-OBSIDIAN_LEDGER_PATH = '/Users/sundar/Documents/Obsidian/Thought Den/transactions.ledger'
+OBSIDIAN_BASE_PATH = os.getenv('OBSIDIAN_BASE_PATH')
+OBSIDIAN_LEDGER_PATH = os.path.join(OBSIDIAN_BASE_PATH, os.getenv('OBSIDIAN_LEDGER_PATH'))
+print(OBSIDIAN_LEDGER_PATH)
 
 def parse_ledger_file(file_path):
     with open(file_path, 'r') as file:
