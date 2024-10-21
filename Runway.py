@@ -47,6 +47,9 @@ from utility.expenses_base import fetch_only_expenses, fetch_default_expenses, f
 import pandas as pd
 import streamlit.components.v1 as components
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Streamlit UI
 st.title("Expense Dashboard")
 

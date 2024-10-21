@@ -53,7 +53,8 @@ import pandas as pd
 load_dotenv()
 
 # Get the path to Obsidian daily notes from environment variable
-OBSIDIAN_DAILY_NOTES_PATH = os.getenv('OBSIDIAN_DAILY_NOTES_PATH')
+OBSIDIAN_BASE_PATH = os.getenv('OBSIDIAN_BASE_PATH')
+OBSIDIAN_DAILY_NOTES_PATH = os.path.join(OBSIDIAN_BASE_PATH, os.getenv('OBSIDIAN_DAILY_NOTES_PATH'))
 time_blocks_file = "files/time_blocks.csv"
 
 def parse_time_blocks(file_path, file_date):

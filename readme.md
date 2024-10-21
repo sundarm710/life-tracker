@@ -2,7 +2,7 @@
 
 ## Welcome to the Expense and Time Tracker Dashboard
 
-This repository contains a comprehensive application designed to help users track their expenses and manage their time effectively. Built using Python and Streamlit, the application provides an interactive dashboard for visualizing financial data and time management activities. Below, we will take you through the various components of the codebase, explaining their purpose and functionality.
+This repository contains a comprehensive application designed to help users track their expenses, manage their time effectively, and explore trivia through a fun and interactive quiz interface. Built using Python and Streamlit, the application provides an interactive dashboard for visualizing financial data, time management activities, and engaging with trivia topics. Below, we will take you through the various components of the codebase, explaining their purpose and functionality.
 
 ---
 
@@ -14,6 +14,7 @@ This repository contains a comprehensive application designed to help users trac
 4. [Key Components](#key-components)
    - [Expense Dashboard](#expense-dashboard)
    - [Time Tracker Dashboard](#time-tracker-dashboard)
+   - [Kvizzing Trivia Interface](#kvizzing-trivia-interface)
    - [Budget Management](#budget-management)
    - [Data Handling](#data-handling)
 5. [Usage](#usage)
@@ -24,7 +25,7 @@ This repository contains a comprehensive application designed to help users trac
 
 ## Project Overview
 
-The Expense and Time Tracker Dashboard is designed to provide users with insights into their spending habits and time allocation. The application allows users to visualize their expenses through various charts and manage their time effectively by tracking different activities. The dashboard is built using Streamlit, a powerful framework for creating web applications in Python.
+The Expense and Time Tracker Dashboard is designed to provide users with insights into their spending habits and time allocation. Additionally, the Kvizzing Trivia Interface offers a fun way to learn new facts and engage with various topics. The application allows users to visualize their expenses through various charts, manage their time effectively by tracking different activities, and explore trivia topics through an interactive quiz interface. The dashboard is built using Streamlit, a powerful framework for creating web applications in Python.
 
 ---
 
@@ -63,6 +64,7 @@ The project is organized into several directories and files:
 │   └── budget_manager.py
 ├── pages
 │   ├── ExpensesBreakdown.py
+│   ├── Kvizzing.py
 │   ├── NetWorth.py
 │   ├── TimeGoals.py
 │   └── TimeSpent.py
@@ -109,6 +111,15 @@ The time tracker includes features like:
 - **Activity Categorization**: Activities are categorized for better visualization and tracking.
 - **Time Charts**: Users can view their time spent on different activities in daily, weekly, or monthly formats.
 
+### Kvizzing Trivia Interface
+
+The `Kvizzing.py` file introduces a trivia interface that allows users to explore interesting facts and trivia about various topics. It includes features such as:
+
+- **Topic Loading**: Reads and processes topics from a specified file.
+- **Trivia Generation**: Uses OpenAI's API to generate trivia content for selected topics.
+- **Interactive Carousel**: Displays a carousel of topics for users to explore.
+- **Chat Interface**: Allows users to interact with a trivia bot and receive responses in a conversational format.
+
 ### Budget Management
 
 The `budget_manager.py` component handles budget-related functionalities. It allows users to:
@@ -129,10 +140,11 @@ The `utility` directory contains various modules responsible for data handling:
 
 ## Usage
 
-Once the application is running, users can navigate through the dashboard to explore their expenses and time management activities. The interface is intuitive, allowing users to interact with various components seamlessly.
+Once the application is running, users can navigate through the dashboard to explore their expenses, time management activities, and trivia topics. The interface is intuitive, allowing users to interact with various components seamlessly.
 
 1. **Expense Dashboard**: Users can filter expenses, view charts, and calculate their runway.
 2. **Time Tracker**: Users can track their time spent on different activities and visualize their progress against set goals.
+3. **Kvizzing Trivia Interface**: Users can explore trivia topics, generate trivia content, and interact with the trivia bot.
 
 ---
 
@@ -148,4 +160,4 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 
 ---
 
-Thank you for exploring the Expense and Time Tracker Dashboard! We hope this application helps you manage your finances and time more effectively. If you have any questions or feedback, feel free to reach out.
+Thank you for exploring the Expense and Time Tracker Dashboard! We hope this application helps you manage your finances, time, and trivia knowledge more effectively. If you have any questions or feedback, feel free to reach out.
