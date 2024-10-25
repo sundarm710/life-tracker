@@ -107,9 +107,8 @@ def fetch_trivia(topic):
         Say as if you want to keep the audience engaged.
         Use bullet points if necessary. 
         Include tables while making comparisons.
-        Divide into subheadings if necessary.
+        Divide into sections.
         Do not list information like in Wikipedia.
-        Share as anectodes if necessary.
     """
 
     print(prompt)
@@ -165,9 +164,6 @@ def main():
     print("App is running...")
 
     display_chat_interface()
-
-    st.header("Messages in session state:")
-    st.write(st.session_state.messages)
 
 if __name__ == "__main__":
     main()
