@@ -2,6 +2,7 @@ import pandas as pd
 from fuzzywuzzy import process
 from components.workout_database_manager import WorkoutDatabaseManager
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 
 class WorkoutDataProcessor:
@@ -37,6 +38,10 @@ class WorkoutDataProcessor:
         """
         workouts = self.db_manager.get_workouts(start_date, end_date)
         df = pd.DataFrame(workouts)
+        df['date'] = pd.to_datetime(df['date'])
+        df['week'] = df['date'].dt.to_period('W').apply(lambda r: r.start_time)
+        df['volume'] = df['weight_kg'] * df['reps']
+        
         return self.clean_exercise_names(df)
 
     def aggregate_workout_data(self, df: pd.DataFrame, groupby: list, agg_func: dict) -> pd.DataFrame:
@@ -45,89 +50,109 @@ class WorkoutDataProcessor:
         """
         return df.groupby(groupby).agg(agg_func).reset_index()
 
-    def prepare_volume_progression_data(self, start_date: str, end_date: str) -> pd.DataFrame:
+    def prepare_volume_progression_data(self, start_date: str, end_date: str) -> tuple[go.Figure, go.Figure, go.Figure]:
         """
-        Prepare data for volume progression visualization.
+        Prepare data for volume progression visualization using stacked bar charts.
+        Groups exercises by muscle group and stacks them to show total volume contribution.
         """
-        df = self.get_workouts(start_date, end_date)
-        df['week'] = pd.to_datetime(df['date']).dt.to_period('W').apply(lambda r: r.start_time)
-        volume_data_grouped = df.groupby(['week', 'muscle_group', 'exercise_name']).agg({'weight_kg': 'max', 'reps': 'sum'}).reset_index()
-        volume_data_grouped['volume'] = volume_data_grouped['weight_kg'] * volume_data_grouped['reps']
 
-        # Create facet charts for each muscle group
+        df = self.get_workouts(start_date, end_date)
+        st.write(df)
+        volume_data_grouped = self.aggregate_workout_data(df, ['date', 'week', 'muscle_group', 'exercise_name'], {'weight_kg': 'max', 'reps': 'sum', 'volume': 'sum', 'set_number': 'max'})
+        st.write(volume_data_grouped)
+
+        fig = px.bar(volume_data_grouped, x="muscle_group", y="volume",
+             color='week', barmode='group',
+             hover_data="exercise_name",
+             height=400)
+        st.write(fig)
+
+        # Create separate figures for each visualization
+        fig_volume = go.Figure()
         fig_weight = go.Figure()
         fig_reps = go.Figure()
-        fig_volume = go.Figure()
 
-        for muscle_group in volume_data_grouped['muscle_group'].unique():
+        # Get unique muscle groups and assign colors
+        muscle_groups = volume_data_grouped['muscle_group'].unique()
+        colors = px.colors.qualitative.Set3[:len(muscle_groups)]
+        color_map = dict(zip(muscle_groups, colors))
+
+        # Create stacked bar charts
+        for muscle_group in muscle_groups:
             muscle_group_data = volume_data_grouped[volume_data_grouped['muscle_group'] == muscle_group]
+            base_color = color_map[muscle_group]
             
-            for exercise_name in muscle_group_data['exercise_name'].unique():
+            # Generate slightly different shades for exercises within the same muscle group
+            exercises = muscle_group_data['exercise_name'].unique()
+        
+            for idx, exercise_name in enumerate(exercises):
                 exercise_data = muscle_group_data[muscle_group_data['exercise_name'] == exercise_name]
                 
-                fig_weight.add_trace(go.Scatter(
-                    x=exercise_data['week'], 
-                    y=exercise_data['weight_kg'], 
-                    mode='lines+markers', 
-                    name=f"{muscle_group} - {exercise_name}",
-                    legendgroup=muscle_group,
-                    showlegend=True
-                ))
-                
-                fig_reps.add_trace(go.Scatter(
-                    x=exercise_data['week'], 
-                    y=exercise_data['reps'], 
-                    mode='lines+markers', 
-                    name=f"{muscle_group} - {exercise_name}",
-                    legendgroup=muscle_group,
-                    showlegend=True
-                ))
-                
-                fig_volume.add_trace(go.Scatter(
-                    x=exercise_data['week'], 
-                    y=exercise_data['volume'], 
-                    mode='lines+markers', 
-                    name=f"{muscle_group} - {exercise_name}",
-                    legendgroup=muscle_group,
-                    showlegend=True
-                ))
+            # Volume chart
+            fig_volume.add_trace(go.Bar(
+                x=exercise_data['date'],
+                y=exercise_data['volume'],
+                name=f"{muscle_group} - {exercise_name}",
+                legendgroup=muscle_group,
+                marker_color=base_color,
+                showlegend=True
+            ))
+            
+            # Weight chart
+            fig_weight.add_trace(go.Bar(
+                x=exercise_data['date'],
+                y=exercise_data['weight_kg'],
+                name=f"{muscle_group} - {exercise_name}",
+                legendgroup=muscle_group,
+                marker_color=base_color,
+                showlegend=True
+            ))
+            
+            # Reps chart
+            fig_reps.add_trace(go.Bar(
+                x=exercise_data['date'],
+                y=exercise_data['reps'],
+                name=f"{muscle_group} - {exercise_name}",
+                legendgroup=muscle_group,
+                marker_color=base_color,
+                showlegend=True
+            ))
 
-        # Update layout for better UI/UX
-        fig_weight.update_layout(
-            title="Weekly Maximum Weight Lifted per Muscle Group",
-            xaxis_title="Week",
-            yaxis_title="Weight (kg)",
-            template="plotly_white",
-            height=600,
-            width=1000
+        # Update layout for all charts
+        for fig, title, ylabel in [
+            (fig_volume, "Daily Volume (Weight × Reps) by Exercise", "Volume"),
+            (fig_weight, "Daily Maximum Weight by Exercise", "Weight (kg)"),
+            (fig_reps, "Daily Total Reps by Exercise", "Reps")
+        ]:
+            fig.update_layout(
+                title=title,
+                xaxis_title="Day",
+                yaxis_title=ylabel,
+                template="plotly_white",
+                height=600,
+                width=1000,
+                barmode='stack',
+                legend=dict(
+                yanchor="top",
+                y=-0.1,
+                xanchor="left",
+                x=0,
+                orientation="h"
+            ),
+            margin=dict(b=150)  # Add bottom margin for legend
         )
 
-        fig_reps.update_layout(
-            title="Weekly Total Reps per Muscle Group",
-            xaxis_title="Week",
-            yaxis_title="Reps",
-            template="plotly_white",
-            height=600,
-            width=1000
-        )
+        # Display charts in Streamlit
+        st.write("### Volume Progression")
+        st.plotly_chart(fig_volume, use_container_width=True)
+        
+        st.write("### Weight Progression")
+        st.plotly_chart(fig_weight, use_container_width=True)
+        
+        st.write("### Reps Progression")
+        st.plotly_chart(fig_reps, use_container_width=True)
 
-        fig_volume.update_layout(
-            title="Weekly Volume (Weight x Reps) per Muscle Group",
-            xaxis_title="Week",
-            yaxis_title="Volume",
-            template="plotly_white",
-            height=600,
-            width=1000
-        )
-
-        st.write("Weight")
-        st.plotly_chart(fig_weight)
-        st.write("Reps")
-        st.plotly_chart(fig_reps)
-        st.write("Volume")
-        st.plotly_chart(fig_volume)
-
-        return fig_weight, fig_reps, fig_volume
+        return fig_volume, fig_weight, fig_reps
 
     def prepare_exercise_frequency_data(self, start_date: str, end_date: str) -> pd.DataFrame:
         """

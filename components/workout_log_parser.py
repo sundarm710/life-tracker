@@ -165,24 +165,24 @@ class WorkoutLogParser:
                 })
                 .reset_index())
 
-# Example usage
-if __name__ == "__main__":
-    sample_log = """Pull 1
-    Barbell bench press - 20, 25, 45, 10 - usual
-    Shoulder press - 20, 15, 8, 10 - 15, 12, 10, 10 (increase weight next time)"""
+# # Example usage
+# if __name__ == "__main__":
+#     sample_log = """Pull 1
+#     Barbell bench press - 20, 25, 45, 10 - usual
+#     Shoulder press - 20, 15, 8, 10 - 15, 12, 10, 10 (increase weight next time)"""
 
-    parser = WorkoutLogParser()
-    try:
-        df = parser.parse_workout_text(sample_log, debug=True)
-        st.write("\nParsed Data:")
-        st.write(df)
+#     parser = WorkoutLogParser()
+#     try:
+#         df = parser.parse_workout_text(sample_log, debug=True)
+#         st.write("\nParsed Data:")
+#         st.write(df)
         
-        st.write("\nExercise Summary:")
-        st.write(parser.get_exercise_summary())
+#         st.write("\nExercise Summary:")
+#         st.write(parser.get_exercise_summary())
 
-        st.write("\nExercise Progress:")
-        for exercise in ['Barbell bench press', 'Shoulder press']:
-            st.write(exercise)
-            st.write(parser.get_progress_data(exercise))
-    except ValueError as e:
-        print(f"Error parsing workout log: {str(e)}")
+#         st.write("\nExercise Progress:")
+#         for exercise in ['Barbell bench press', 'Shoulder press']:
+#             st.write(exercise)
+#             st.write(parser.get_progress_data(exercise))
+#     except ValueError as e:
+#         print(f"Error parsing workout log: {str(e)}")
