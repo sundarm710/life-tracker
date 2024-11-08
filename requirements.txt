@@ -46,5 +46,4 @@ tzdata
 urllib3
 wheel==0.44.0
 psycopg2
-psycopg2-binary
-postgresql
+psycopg2-binary==2.9.10

@@ -66,7 +66,8 @@ def load_data():
 
 def fetch_only_expenses():
     df = load_data()
-    df = df[df['Expense_1'] == 'Expenses']
+    df = df[(df['Expense_1'] == 'Expenses') | (df['Expense_1'] == 'Assets')]
+    df = df[df['Expense_2'] != 'Banking']
     return df
 
 def fetch_only_expenses_excluding_home_loan():

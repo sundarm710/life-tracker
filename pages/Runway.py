@@ -81,7 +81,7 @@ month_expenses['Weighted_Moving_Avg'] = month_expenses['Amount'].rolling(window=
     lambda x: (x * [0.1, 0.3, 0.6][-len(x):]).sum(), raw=True
 )
 # Calculate average burn per month
-current_burn = month_expenses['Amount'].iloc[-1]
+current_burn = month_expenses['Weighted_Moving_Avg'].iloc[-1]
 
 # Input slider for current net worth
 net_worth = st.slider("Enter your current net worth (₹)", min_value=0, max_value=10000000, value=3500000, step=10000)
