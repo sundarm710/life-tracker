@@ -1,4 +1,8 @@
 import streamlit as st
+st.set_page_config(layout="wide")
+
+st.title("WIP")
+"""
 import psutil
 import platform
 from datetime import datetime
@@ -11,7 +15,7 @@ from components.workout_log_parser import WorkoutLogParser
 from components.workout_database_manager import WorkoutDatabaseManager
 from components.workout_data_processor import WorkoutDataProcessor
 
-st.set_page_config(layout="wide")
+
 st.session_state['debug'] = False
 
 # Initialize the database manager and data processor
@@ -19,7 +23,7 @@ db_manager = WorkoutDatabaseManager()
 data_processor = WorkoutDataProcessor(db_manager)
 
 def generate_workout_data(parsed_df, date):
-    """
+    
     Generate workout data with sets grouped by exercise.
     
     Args:
@@ -28,7 +32,7 @@ def generate_workout_data(parsed_df, date):
     
     Returns:
         dict: Workout data with exercises and their sets grouped together
-    """
+
     # Create final workout data structure
     workout_data = {
         'date': date,
@@ -109,3 +113,4 @@ if st.button("Generate Analysis"):
 # Close the database manager when the app is stopped
 def on_app_close():
     db_manager.close()
+"""
