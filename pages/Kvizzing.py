@@ -53,10 +53,6 @@ def load_topics_from_file(file_path):
 kvizzing_path = os.path.join(os.environ.get("OBSIDIAN_BASE_PATH"), os.environ.get("OBSIDIAN_KVIZZING_PATH"))
 st.session_state.topics = load_topics_from_file(kvizzing_path)
 
-
-system_prompt = """
-        You are a helpful assistant that can answer questions and provide information.
-"""
 from typing import Optional
 
 def get_chat_response(user_request: str, context: Optional[str] = None) -> str:
@@ -79,8 +75,6 @@ def get_chat_response(user_request: str, context: Optional[str] = None) -> str:
     # Add context or system prompt to messages
     if context:
         st.session_state.messages.append({"role": "assistant", "content": context})
-    else:
-        st.session_state.messages.append({"role": "assistant", "content": system_prompt})
 
     # Add user request to messages
     st.session_state.messages.append({"role": "user", "content": user_request})
@@ -105,10 +99,15 @@ def fetch_trivia(topic):
         Keep the tone of the response as if its being told by a friend, skip the salutations. 
         And keep it chill, don't overdo it.
         Say as if you want to keep the audience engaged.
-        Use bullet points if necessary. 
-        Include tables while making comparisons.
-        Divide into sections.
-        Do not list information like in Wikipedia.
+        What are some lesser-known aspects of {topic} that reveal its complexity or uniqueness?
+        Explain how {topic} is applied in the real world and provide examples of its impact.
+        What are some contrasting perspectives on {topic}, and how do they shape our understanding?
+        What are some future trends in {topic}, and what potential does it hold for innovation or progress?
+        Discuss the biggest challenges or ethical issues related to {topic} and their potential solutions.
+        What are some major debates or controversies surrounding {topic}?
+        What are some lesser-known facts or interesting details about {topic} that most people might not know?
+        What are the core theories or concepts in {topic} that one needs to understand to grasp it fully?
+        Do not hallucinate. Skip if you don't know.
     """
 
     print(prompt)
@@ -127,25 +126,32 @@ def display_carousel():
     topics = st.session_state.topics
     selected_topic = topics[random.randint(0, len(topics) - 1)]
 
+    # Add an input text box for the user to input a topic
+    user_topic = st.text_input("Enter a topic (optional):")
+
     if st.button("Generate Trivia"):
         st.session_state.messages = []
-        print(f"Selected topic: {selected_topic}")
+        if user_topic:
+            selected_topic = user_topic  # Override the random generation if user input is provided
+        st.header(f"{selected_topic}")
         trivia = fetch_trivia(selected_topic)
         
         st.session_state.last_trivia = trivia  # Store the trivia in session state
 
 # Function to display the chat interface
 def display_chat_interface():
-    st.subheader("Chat with the Trivia Bot")
+
     if 'messages' not in st.session_state:
         st.session_state.messages = []
 
     # Display chat messages
-    for msg in st.session_state.messages:
-        if msg['role'] == 'user':
-            st.markdown(f"**You:** \n {msg['content']}")
-        else:
-            st.markdown(f"**Bot:** \n {msg['content']}")
+    for msg in st.session_state.messages:  # Skip the first message which is the system prompt
+        if msg['role'] != 'user':
+            st.markdown(f"**Response:** \n {msg['content']}")
+        # if msg['role'] == 'user':
+        #     st.markdown(f"**You:** \n {msg['content']}")
+        # else:
+        #     st.markdown(f"**Bot:** \n {msg['content']}")
 
     # User input for chat
     user_input = st.text_input("Type your message here:", key="chat_input", placeholder="")
