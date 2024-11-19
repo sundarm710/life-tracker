@@ -65,6 +65,8 @@ def parse_ledger_file(file_path):
                 while len(account_parts) < 3:
                     account_parts.append('')
 
+                print(account_parts)
+
                 expense_1, expense_2, expense_3 = account_parts
 
                 # Add the parsed entry to the result
