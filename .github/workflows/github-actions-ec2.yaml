@@ -1,6 +1,5 @@
 name: Push-to-EC2
 
-# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -41,5 +40,13 @@ jobs:
             # Create the target directory if it does not exist
             sudo mkdir -p /var/www/html
 
-            # Move files from the repo to the web server directory
-            sudo mv /home/ec2-user/myapp/* /var/www/html
+            # Loop over all folders in myapp and move them to /var/www/html
+            for dir in /home/ec2-user/myapp/*; do
+              if [ -d "$dir" ]; then
+                dir_name=$(basename "$dir")
+                echo "Moving $dir_name to /var/www/html"
+                # Remove existing directory if it exists
+                sudo rm -rf "/var/www/html/$dir_name"
+                sudo mv "$dir" "/var/www/html/"
+              fi
+            done
