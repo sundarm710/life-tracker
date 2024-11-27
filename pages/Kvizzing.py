@@ -10,7 +10,7 @@ load_dotenv()
 
 # Initialize the OpenAI client with the API key from the environment variable
 client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
+    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
 # Function to read and process topics from the S3 file
