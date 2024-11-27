@@ -11,6 +11,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -25,8 +26,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run code
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Use the secret here
+      - name: Create a dummy Python script
         run: |
-          streamlit run hello_world_streamlit.py
+          echo "import os
+          openai_api_key = os.getenv('OPENAI_API_KEY')
+          print('Using OpenAI API Key:', openai_api_key)" > app.py
+
+      - name: Run the app.py script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Pull secret from GitHub secrets
+        run: |
+          python app.py
