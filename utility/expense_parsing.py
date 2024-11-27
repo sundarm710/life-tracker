@@ -1,36 +1,40 @@
 import re
 import csv
-from datetime import datetime
 import os
+from datetime import datetime
 from dotenv import load_dotenv
+import boto3
 
+# Load environment variables from .env file
 load_dotenv()
-print(os.getenv('OBSIDIAN_BASE_PATH'))
 
+# Define your S3 bucket and key (path) from environment variables
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'obsidian-notes-storage')
+S3_OBJECT_KEY = os.getenv('S3_OBJECT_KEY', 'ThoughtDenS3/transactions.ledger')  # Path in your S3 bucket
 
-# Get the path to Obsidian ledger.txt from environment variable
-# OBSIDIAN_LEDGER_PATH = os.getenv('OBSIDIAN_LEDGER_PATH')
-OBSIDIAN_BASE_PATH = os.getenv('OBSIDIAN_BASE_PATH')
-OBSIDIAN_LEDGER_PATH = os.path.join(OBSIDIAN_BASE_PATH, os.getenv('OBSIDIAN_LEDGER_PATH'))
-print(OBSIDIAN_LEDGER_PATH)
+# Function to fetch the ledger file from S3
+def fetch_ledger_from_s3(bucket_name, object_key):
+    s3_client = boto3.client('s3')
+    response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+    content = response['Body'].read().decode('utf-8')
+    return content
 
-def parse_ledger_file(file_path):
-    with open(file_path, 'r') as file:
-        content = file.read()
-
+# Function to parse the ledger file content
+def parse_ledger_file(content):
     # Split the content into blocks based on empty lines (transaction boundaries)
     blocks = content.strip().split('\n\n')
 
     result = []
+    start_parsing = False  # Initialize flag for starting to parse after "Starting Balances" section
 
     for block in blocks:
         lines = block.split('\n')
 
-        # Check if the block is part of the "Starting Balances" section
+        # Skip blocks related to "Starting Balances" section
         if any("Starting Balances" in line for line in lines):
             continue
 
-        # Activate parsing after the starting balances
+        # Activate parsing after the starting balances section
         if any(re.match(r'\d{4}/\d{2}/\d{2}', line) for line in lines):
             start_parsing = True
 
@@ -65,8 +69,7 @@ def parse_ledger_file(file_path):
                 while len(account_parts) < 3:
                     account_parts.append('')
 
-                print(account_parts)
-
+                # Assign the parts to the respective expense categories
                 expense_1, expense_2, expense_3 = account_parts
 
                 # Add the parsed entry to the result
@@ -74,19 +77,32 @@ def parse_ledger_file(file_path):
 
     return result
 
+# Function to write the parsed data to a CSV file
 def write_to_csv(data, output_file):
+    # Ensure the 'files' directory exists
+    if not os.path.exists('files'):
+        os.makedirs('files')
+
     with open(output_file, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Date', 'Description', 'Amount', 'Expense_1', 'Expense_2', 'Expense_3'])
         
+        # Write each parsed row to the CSV file
         for row in data:
             writer.writerow(row)
 
+# Function to create the expense CSV
 def create_expense_csv():
-    file_path = OBSIDIAN_LEDGER_PATH  # Path to your ledger file
+    # Fetch the ledger file content from S3
+    ledger_content = fetch_ledger_from_s3(S3_BUCKET_NAME, S3_OBJECT_KEY)
+    
+    # Output file location
     output_file = 'files/ledger_output.csv'  # Output CSV file name
 
-    parsed_data = parse_ledger_file(file_path)
+    # Parse the ledger content
+    parsed_data = parse_ledger_file(ledger_content)
+
+    # Write the parsed data to a CSV file
     write_to_csv(parsed_data, output_file)
 
     print(f"CSV file '{output_file}' has been created successfully.")
