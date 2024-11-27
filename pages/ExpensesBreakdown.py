@@ -82,7 +82,7 @@ if submit_button:
 group_by_option = st.selectbox("Group by", ["Expense_2", "Expense_1", "Expense_3"])
 
 # Tabs for daily, weekly, and monthly views
-tab3, tab1, tab2 = st.tabs(["Monthly View", "Weekly View", "Daily View"])
+tab3, tab1, tab2 = st.tabs(["Monthly View", "Daily View", "Weekly View"])
 
 # Create charts for each tab
 with tab3:
@@ -102,7 +102,7 @@ expense_2_filter = st.selectbox("Filter by Expense_2", df["Expense_2"].dropna().
 filtered_df = df[(df['Expense_2'] == expense_2_filter) & (df['Expense_1'] == 'Expenses')]
 
 # Tabs for daily, weekly, and monthly views of filtered data by Expense_3
-tab4, tab5, tab6 = st.tabs([f"Monthly - {expense_2_filter}", f"Weekly - {expense_2_filter}", f"Daily - {expense_2_filter}"])
+tab4, tab5, tab6 = st.tabs([f"Monthly - {expense_2_filter}", f"Daily - {expense_2_filter}", f"Weekly - {expense_2_filter}"])
 
 with tab6:
     fig_daily_filtered = create_time_chart(filtered_df, 'daily', 'Expense_3')
