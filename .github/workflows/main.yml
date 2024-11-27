@@ -29,4 +29,4 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Use the secret here
         run: |
-          python your_script.py
+          streamlit run hello_world_streamlit.py
