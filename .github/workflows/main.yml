@@ -30,7 +30,16 @@ jobs:
         run: |
           echo "import os
           openai_api_key = os.getenv('OPENAI_API_KEY')
-          print('Using OpenAI API Key:', openai_api_key)" > app.py
+          
+          if openai_api_key is None:
+              print("Error: OPENAI_API_KEY is not set.")
+          else:
+              print("Successfully retrieved OPENAI_API_KEY.")
+              # Optionally, check if the key starts with the correct prefix for OpenAI keys
+              if openai_api_key.startswith("sk-"):
+                  print("The API key looks valid.")
+              else:
+                print("Warning: The API key does not look valid.")" > app.py
 
       - name: Run the app.py script
         env:
