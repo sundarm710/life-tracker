@@ -2,8 +2,19 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from utility.expenses_base import fetch_only_expenses, fetch_default_expenses, fetch_hover_text
+from components.datatable_callout import CalloutSystem
 
-
+st.set_page_config(
+    page_title="Ex-stream-ly Cool App",
+    page_icon="🧊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': 'https://www.extremelycoolapp.com/help',
+        'Report a bug': "https://www.extremelycoolapp.com/bug",
+        'About': "# This is a header. This is an *extremely* cool app!"
+    }
+)
 # Function to create time charts (daily, weekly, or monthly)
 def create_time_chart(df, view_type, group_by):
     """
@@ -53,11 +64,11 @@ def create_time_chart(df, view_type, group_by):
         yaxis_title="Amount (₹)",
         barmode='stack',
         showlegend=True,
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
 
     return fig
 
-# Streamlit UI
 st.title("Expense Dashboard")
 
 with st.form("Expense Type"):
@@ -115,3 +126,13 @@ with tab5:
 with tab4:
     fig_monthly_filtered = create_time_chart(filtered_df, 'monthly', 'Expense_3')
     st.plotly_chart(fig_monthly_filtered, use_container_width=True)
+
+# # Integrate CalloutSystem for dynamic callouts
+# callout_system = CalloutSystem(df)
+# callout_system.calculate_rolling_stats(target_column='Amount')
+# callout_system.check_spike_in_column(target_column='Amount')
+# callout_system.check_drop_in_column(target_column='Amount')
+# callouts_df = callout_system.get_callouts()
+
+# st.subheader("Dynamic Callouts")
+# st.dataframe(callouts_df)

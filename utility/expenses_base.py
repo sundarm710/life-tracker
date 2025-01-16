@@ -44,7 +44,6 @@ import pandas as pd
 import plotly.graph_objs as go
 from utility.expense_parsing import create_expense_csv
 
-st.set_page_config(layout="wide")
 
 # Load data
 @st.cache_data

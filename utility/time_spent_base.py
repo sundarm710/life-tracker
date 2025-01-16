@@ -7,6 +7,20 @@ import streamlit as st
 def time_to_float(t):
     return t.hour + t.minute / 60
 
+def calculate_duration(start_time, end_time):
+    """Calculate duration in hours between two time objects"""
+    # Convert times to minutes since midnight
+    start_minutes = start_time.hour * 60 + start_time.minute
+    end_minutes = end_time.hour * 60 + end_time.minute
+    
+    # Calculate duration in minutes
+    duration_minutes = end_minutes - start_minutes
+    
+    # Convert to hours
+    duration_hours = duration_minutes / 60
+    
+    return duration_hours
+
 def fetch_productive_time_blocks():
     df = fetch_time_blocks()
     df = df[df['Activity Category'].isin(['Workout', 'Work', 'Projects', 'Learning', 'Reading-Writing', 'Meditation', 'Chess', 'Reflection'])]
@@ -19,39 +33,37 @@ def fetch_chill_time_blocks():
 
 def fetch_hover_text(df):
     # Ensure columns exist in DataFrame
-    if all(col in df.columns for col in ['Activity', 'Day of Week', 'Date', 'Start Time', 'End Time', 'Duration_Hours']):
-        return [f"{activity} ({day}, {date.date()}, {start_time} - {end_time}, {duration:.2f} hrs)" 
-                for activity, day, date, start_time, end_time, duration  
-                in zip(df['Activity'], 
+    if all(col in df.columns for col in ['Activity', 'Activity Category', 'Day of Week', 'Date', 'Start Time', 'End Time', 'Duration_Hours']):
+        return [f"{activity} ({category}) ({day}, {date.date()}, {start_time.strftime('%H:%M')} - {end_time.strftime('%H:%M')}, {duration:.2f}h)" 
+                for activity, category, day, date, start_time, end_time, duration  
+                in zip(df['Activity'],
+                       df['Activity Category'], 
                        df['Day of Week'], 
                        df['Date'], 
                        df['Start Time'], 
                        df['End Time'],
                        df['Duration_Hours'])]
     else:
-        return [''] * len(df)  # Return empty strings if columns are missing
+        return [''] * len(df)
 
 def generate_time_blocks_heatmap(df):
     fig = go.Figure()
 
-    # Assign a single activity to each row based on priority order
-    # df['Assigned Activity'] = df.apply(assign_activity, axis=1)
-
-    # Add traces for each activity
     for activity, details in fetch_activities().items():
         activity_df = df[df['Activity Category'] == activity]
-
+        
+        # Calculate durations using Duration_Hours column instead of recalculating
         fig.add_trace(go.Bar(
             x=activity_df['Date'],
-            y=[time_to_float(end) - time_to_float(start) for start, end in zip(activity_df['Start Time'], activity_df['End Time'])],
+            y=activity_df['Duration_Hours'],  # Use the pre-calculated Duration_Hours
             base=[time_to_float(start) for start in activity_df['Start Time']],
             name=activity,
             marker_color=details['color'],
             hovertext=fetch_hover_text(activity_df),
-            hoverinfo='text',  # Only display hover text
-            hoverlabel=dict(namelength=-1),  # Show full activity name in hover label
+            hoverinfo='text',
+            hoverlabel=dict(namelength=-1),
             customdata=activity_df[['Activity', 'Day of Week', 'Start Time', 'End Time']],
-            hovertemplate="<b>%{customdata[0]}</b><br>" +
+            hovertemplate="<b>%{customdata[0]}</b> (%{customdata[0]})<br>" +
                           "Date: %{x|%Y-%m-%d}<br>" +
                           "Day: %{customdata[1]}<br>" +
                           "Time: %{customdata[2]} - %{customdata[3]}<br>" +
@@ -79,10 +91,13 @@ def generate_time_blocks_heatmap(df):
 def generate_duration_count_chart(df):
     fig = go.Figure()
 
-    # Group the data by Date and Assigned Activity
-    grouped_df = df.groupby(['Date', 'Activity Category', 'Day of Week', 'Start Time', 'End Time'])['Duration_Hours'].sum().reset_index()
+    # Calculate durations before grouping
+    df['Duration_Hours'] = [calculate_duration(start, end) 
+                           for start, end in zip(df['Start Time'], df['End Time'])]
+    
+    # Group by Date and Activity Category and sum the Duration_Hours
+    grouped_df = df.groupby(['Date', 'Activity Category', 'Day of Week'])['Duration_Hours'].sum().reset_index()
 
-    # Add traces for each activity
     for activity, details in fetch_activities().items():
         activity_df = grouped_df[grouped_df['Activity Category'] == activity]
 
@@ -91,16 +106,15 @@ def generate_duration_count_chart(df):
             y=activity_df['Duration_Hours'],
             name=activity,
             marker_color=details['color'],
-            
-            hovertext=fetch_hover_text(activity_df),
-            hoverinfo='text',  # Only display hover text
-            hoverlabel=dict(namelength=-1),  # Show full activity name in hover label
-            customdata=activity_df[['Activity Category', 'Day of Week', 'Start Time', 'End Time']],
-            hovertemplate="<b>%{customdata[0]}</b><br>" +
-                          "Date: %{x|%Y-%m-%d}<br>" +
-                          "Day: %{customdata[1]}<br>" +
-                          "Time: %{customdata[2]} - %{customdata[3]}<br>" +
-                          "Duration: %{y:.2f} hours<extra></extra>"
+            customdata=activity_df[['Activity Category', 'Day of Week', 'Duration_Hours']],
+            hovertext=[f"{category} ({day}, {date.date()}, {duration:.2f}h)"
+                      for category, day, date, duration
+                      in zip(activity_df['Activity Category'],
+                            activity_df['Day of Week'],
+                            activity_df['Date'],
+                            activity_df['Duration_Hours'])],
+            hoverinfo='text',
+            hoverlabel=dict(namelength=-1)
         ))
 
     # Customize the layout

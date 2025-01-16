@@ -135,7 +135,7 @@ def fetch_activities():
             'Admin': {'color': 'orange', 'keywords': ['Chores', 'Prep', 'Dishes', 'Bath', 'Breakfast', 'Dinner', 'Lunch', 'Commute', 'Travel', 'Bus']},
             'Workout': {'color': 'green', 'keywords': ['Workout', 'Gym', 'Stretch']},
             'Work': {'color': 'blue', 'keywords': ['Office', 'Work', 'Toplyne']},
-            'Projects': {'color': 'purple', 'keywords': ['Project', 'Obsidian', 'Budgeting and Expense', 'Ledger', 'Life Admin', 'Maintenance', 'Push', 'Grind' ]},
+            'Projects': {'color': 'purple', 'keywords': ['Expenses', 'Project', 'Obsidian', 'Budgeting and Expense', 'Ledger', 'Life Admin', 'Maintenance', 'Push', 'Grind' ]},
             'Learning': {'color': 'purple', 'keywords': ['Learning', 'Learn', 'Brilliant.org']},
             'Reflection': {'color': 'purple', 'keywords': ['Journal', 'Review', 'Plan']},
             'Chill': {'color': 'red', 'keywords': ['Chill', 'YouTube', 'Movie', 'TV', 'Standup', 'Trip']},
